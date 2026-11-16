@@ -1,0 +1,40 @@
+# Coordination et documents non techniques
+/.coordination/
+/A0-TP3.pdf
+/Guide_modeles_IA_2026.pdf
+/Protocole_general_orchestration_projets_techniques_scientifiques_v2_1.md
+
+# Compte rendu universitaire et ses ressources : utiliser ce dossier
+/rapport/
+/rapport*.tex
+/rapport*.pdf
+/tp-*.pdf
+
+# Compilations et fichiers temporaires
+/build/
+/bin/
+*.o
+*.obj
+*.a
+*.so
+*.out
+*.exe
+*.tmp
+*.log
+*~
+__pycache__/
+*.pyc
+
+# Sous-produits LaTeX
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out.ps
+*.run.xml
+*.synctex.gz
+*.toc
