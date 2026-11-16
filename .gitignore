@@ -12,6 +12,8 @@
 
 # Compilations et fichiers temporaires
 /build/
+/results/
+res-*
 /bin/
 *.o
 *.obj
