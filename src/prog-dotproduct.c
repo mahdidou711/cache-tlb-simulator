@@ -9,7 +9,7 @@
 FILE *results;
 
 #if CUSTOM_MEMORY_LAYOUT
-double tt[N], *x, *y, s=0;
+double tt[2*N], *x, *y, s=0;
 #else
 double x[N], y[N], s=0;
 #endif

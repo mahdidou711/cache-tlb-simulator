@@ -1,28 +1,26 @@
 #define mway 4	/* Nombre max de bloc par ensemble*/
 #define mnsets 1024	/* Nombre max d'ensembles*/
 
-#define mtway 4		/* Associativité max du TLB*/
+#define mtway 4		/* Associativitï¿½ max du TLB*/
 #define mtnsets 32	/* nombre max d'ensembles du TLB*/
 #define pagesize 1024	/* Taille d'une page */
 
-int am=0,			/* incrémenté à chaque accès mémoire */
-  dc=0,				/* nombre de défauts de cache */
-  dtlb=0,				/* nombre de défauts de cache */
-  ETIQ[mnsets][mway],		/* étiquette associées aux différentes
+int am=0,			/* incrï¿½mentï¿½ ï¿½ chaque accï¿½s mï¿½moire */
+  dc=0,				/* nombre de dï¿½fauts de cache */
+  dtlb=0,				/* nombre de dï¿½fauts de cache */
+  ETIQ[mnsets][mway],		/* ï¿½tiquette associï¿½es aux diffï¿½rentes
 				   lignes de cache */
-  LRU[mnsets][mway],		/* ancienneté des lignes */
-  tETIQ[mtnsets][mtway],		/* étiquette associées aux différentes
-				   entrées du TLB */
-  tLRU[mtnsets][mtway];		/* ancienneté des entrées du TLB */
-
+  LRU[mnsets][mway],		/* anciennetï¿½ des lignes */
+  tLRU[mtnsets][mtway];		/* anciennetï¿½ des entrï¿½es du TLB */
+unsigned long tETIQ[mtnsets][mtway]; /* ï¿½tiquettes des entrï¿½es du TLB (64 bits) */
 
 int line,			/* taille d'une ligne de cache */
   size,				/* taille du cache */
-  way,				/* associativité */
+  way,				/* associativitï¿½ */
   nsets;			/* nombre de blocs */
 
-int tsize,			/* nombre d'entrées du TLB */
-  tway,				/* associativité du TLB */
+int tsize,			/* nombre d'entrï¿½es du TLB */
+  tway,				/* associativitï¿½ du TLB */
   tsets;			/* nombre d'ensemble du TLB */
 
 // pour balayer toutes les configurations
@@ -31,7 +29,7 @@ int tsize,			/* nombre d'entrées du TLB */
       for (way=1;way<8;way+=way)
 
 #define LOOP_TLB_CONFIG  for (tsize=8; tsize <20;tsize+=tsize) \
-      for (tway=1;tway<4;tway+=tway)
+      for (tway=1;tway<=4;tway+=tway)
 
 
 void initcache(){
@@ -81,25 +79,52 @@ int cache( unsigned long ad)
 
 
 void inittlb(){
-  /* A FAIRE : mettre à 0 les mémoires tETIQ et tLRU */
-  am=0;
-  dtlb=0;
+  tsets = tsize / tway;
+  am = 0;
+  dtlb = 0;
+  for (int j = 0; j < tsets; j++)
+    for (int k = 0; k < tway; k++)
+      {
+	tLRU[j][k] = -1;
+	tETIQ[j][k] = 0;
+      }
 }
 
 int tiba (int index)
 {
-  /* A FAIRE : renvoie l'indice de l'entrée de TLB la plus ancienne dans le bloc de TLB 'index' */
-  return 0;
+  /* renvoie l'indice de l'entrï¿½e de TLB la plus ancienne dans l'ensemble 'index' */
+  int j, s, i = 0;
+  s = tLRU[index][0];
+  for (j = 1; j < tway; j++)
+    if (s > tLRU[index][j])
+      {
+	s = tLRU[index][j];
+	i = j;
+      }
+  return (i);
 }
 	
 int tlb( unsigned long ad)
-{	/* acces TLB , gestion des etiquettes et ancienneté, renvoie 1 si
-	   defaut de TLB*/
-  /* AFAIRE : déterminer l'adresse de la page dans ad et gérer l'entrée de TLB à cette adresse */
+{
+  /* acces TLB, gestion des etiquettes et anciennete, renvoie 1 si defaut de TLB */
+  unsigned long page = ad / pagesize;
+  unsigned long tag = page / tsets;
+  int index = page % tsets;
+  int set, j;
 
+  for (set = 0; set < tway; set++)
+    if (tLRU[index][set] != -1 && tETIQ[index][set] == tag)
+      {
+	tLRU[index][set] = am;
+	return (0);
+      }
+
+  j = tiba(index);
+  tETIQ[index][j] = tag;
+  tLRU[index][j] = am;
   return (1);
-	
 }
+
 
 
 void ac(unsigned long z)
